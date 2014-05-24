@@ -1,0 +1,167 @@
+{template 'member', 'header-page'}
+<script type="text/javascript" src="{JS_PATH}formvalidator.js" charset="UTF-8"></script>
+<script type="text/javascript" src="{JS_PATH}formvalidatorregex.js" charset="UTF-8"></script>
+<script type="text/javascript" src="{JS_PATH}dialog.js"></script>
+<link href="{CSS_PATH}dialog_simp.css" rel="stylesheet" type="text/css" />
+
+<script language="JavaScript">
+<!--
+$(function(){
+	$.formValidator.initConfig({autotip:true,formid:"myform",onerror:function(msg){}});
+
+	$("#username").formValidator({onshow:"{L('input').L('username')}",onfocus:"{L('username').L('between_2_to_20')}"}).inputValidator({min:2,max:20,onerror:"{L('username').L('between_2_to_20')}"}).regexValidator({regexp:"ps_username",datatype:"enum",onerror:"{L('username').L('format_incorrect')}"}).ajaxValidator({
+	    type : "get",
+		url : "",
+		data :"m=member&c=index&a=public_checkname_ajax",
+		datatype : "html",
+		async:'false',
+		success : function(data){
+            if( data == "1" ) {
+                return true;
+			} else {
+                return false;
+			}
+		},
+		buttons: $("#dosubmit"),
+		onerror : "{L('deny_register').L('or').L('user_already_exist')}",
+		onwait : "{L('connecting_please_wait')}"
+	});
+	$("#password").formValidator({onshow:"{L('input').L('password')}",onfocus:"{L('password').L('between_6_to_20')}"}).inputValidator({min:6,max:20,onerror:"{L('password').L('between_6_to_20')}"});
+	$("#pwdconfirm").formValidator({onshow:"{L('input').L('cofirmpwd')}",onfocus:"{L('passwords_not_match')}",oncorrect:"{L('passwords_match')}"}).compareValidator({desid:"password",operateor:"=",onerror:"{L('passwords_not_match')}"});
+	$("#email").formValidator({onshow:"{L('input').L('email')}",onfocus:"{L('email').L('format_incorrect')}",oncorrect:"{L('email').L('format_right')}"}).inputValidator({min:2,max:32,onerror:"{L('email').L('between_2_to_32')}"}).regexValidator({regexp:"email",datatype:"enum",onerror:"{L('email').L('format_incorrect')}"}).ajaxValidator({
+	    type : "get",
+		url : "",
+		data :"m=member&c=index&a=public_checkemail_ajax",
+		datatype : "html",
+		async:'false',
+		success : function(data){	
+            if( data == "1" ) {
+                return true;
+			} else {
+                return false;
+			}
+		},
+		buttons: $("#dosubmit"),
+		onerror : "{L('deny_register').L('or').L('email_already_exist')}",
+		onwait : "{L('connecting_please_wait')}"
+	});
+	$("#nickname").formValidator({onshow:"{L('input').L('nickname')}",onfocus:"{L('nickname').L('between_2_to_20')}"}).inputValidator({min:2,max:20,onerror:"{L('nickname').L('between_2_to_20')}"}).regexValidator({regexp:"ps_username",datatype:"enum",onerror:"{L('nickname').L('format_incorrect')}"}).ajaxValidator({
+			type : "get",
+			url : "",
+			data :"m=member&c=index&a=public_checknickname_ajax",
+			datatype : "html",
+			async:'false',
+			success : function(data){
+				if( data == "1" ) {
+					return true;
+				} else {
+					return false;
+				}
+			},
+			buttons: $("#dosubmit"),
+			onerror : "{L('already_exist').L('already_exist')}",
+			onwait : "{L('connecting_please_wait')}"
+		});
+
+	$(":checkbox[name='protocol']").formValidator({tipid:"protocoltip",onshow:"{L('read_protocol')}",onfocus:"{L('read_protocol')}"}).inputValidator({min:1,onerror:"{L('read_protocol')}"});
+	
+	{if $member_setting['mobile_checktype']=='2' && $sms_setting['sms_enable']=='1'}
+	$("#mobile").formValidator({onshow:"请输入手机号码",onfocus:"请输入手机号码"}).inputValidator({min:1,max:11,onerror:"请输入正确的手机号码"});
+	{/if}
+	$("#mobile_verify").formValidator({onshow:"请输入手机收到的验证码",onfocus:"请输入手机收到的验证码"}).inputValidator({min:1,onerror:"请输入手机收到的验证码"}).ajaxValidator({
+					type : "get",
+					url : "api.php",
+					data :"op=sms_idcheck&action=id_code",
+					datatype : "html",
+					{if $member_setting['mobile_checktype']=='2'}
+					getdata:{mobile:"mobile"},
+					{/if}
+					async:"false",
+					success : function(data){
+						if( data == "1" ) {
+							return true;
+						} else {
+  							return false;
+						}
+					},
+					buttons: $("#dosubmit"),
+					onerror : "验证码错误",
+					onwait : "请稍候..."
+				});
+
+	{$formValidator}
+
+	{if !isset($_GET['modelid']) && !isset($_GET['t']) && !empty($member_setting['showregprotocol'])}
+		show_protocol();
+	{/if}
+});
+
+function show_protocol() {
+	art.dialog({lock:false,title:'{L('register_protocol')}',id:'protocoliframe', iframe:'?m=member&c=index&a=register&protocol=1',width:'500',height:'310',yesText:'{L('agree')}'}, function(){
+		$("#protocol").attr("checked",true);
+	});
+}
+
+//-->
+</script>
+<div class="frontLayer onDesktop">
+  
+  <section class="row-fluid" id="mainContainer">
+    
+	<div class="span10 content borBox pull-right">
+    	<div class="row-fluid blogPost">
+      		<div class="span8">
+    			<form action="" class="simple_form form-horizontal new_user" method="post" id="myform">
+      <input type="hidden" name="siteid" value="{$siteid}" />
+
+        <legend>注册新用户</legend>
+        {if $member_setting['choosemodel'] && count($modellist)>1}
+
+        <div class="control-group string required"><label class="string required control-label" for="user_login"><abbr title="required">*</abbr> {L('member_model')}:</label><div class="controls">{loop $modellist $k $v}
+			<label class="type"><input name="modelid" type="radio" value="{$k}" {if $k==$modelid}checked{/if} onclick="changemodel($(this).val())" />{$v['name']}</label>
+			{/loop}</div></div>
+		{else}
+			{loop $modellist $k $v}
+			<input name="modelid" type="hidden" value="{$k}"/>
+			{/loop}
+		{/if}
+
+        <div class="control-group string required"><label class="string required control-label" for="user_login"><abbr title="required">*</abbr> 登录名</label><div class="controls"><input class="string required" id="username" name="username" size="50" style="width:180px;" type="text" /></div></div>
+        <div class="control-group string optional"><label class="string optional control-label" for="user_name">昵称</label><div class="controls"><input class="string optional" id="nickname" name="nickname" size="50" style="width:180px;" type="text" /></div></div>
+        <div class="control-group email required"><label class="email required control-label" for="user_email"><abbr title="required">*</abbr> Email</label><div class="controls"><input class="string email required" id="email" name="email" size="50" style="width:180px;" type="text"/></div></div>
+        <div class="control-group password optional"><label class="password optional control-label" for="user_password">密码</label><div class="controls"><input class="password optional" id="password" name="password" size="50" type="password" /></div></div>
+        <div class="control-group password optional"><label class="password optional control-label" for="user_password_confirmation">确认密码</label><div class="controls"><input class="password optional" id="pwdconfirm" name="pwdconfirm" size="50" type="password" /></div></div>
+        <div class="control-group password optional">
+        	<div class="controls"><input type="checkbox" name="protocol" id="protocol" value=""><a href="javascript:void(0);" onclick="show_protocol();return false;" class="blue">{L('click_read_protocol')}</a></div>
+        </div>
+        <div class="form-actions submit">
+          <input class="btn btn-primary" data-disable-with="正在提交" name="dosubmit" type="submit" value="提交注册信息" />
+        </div>
+
+    			</form>      
+			</div>
+      		<div class="span4 krSide">
+        		<div class="signup_box">
+          			<h6 class="sidebar_title">已经有帐号了？</h6>
+          			<ul>
+          				<a href="{APP_PATH}index.php?m=member&c=index&a=login&siteid={$siteid}">登录</a><br />
+
+					  	<a href="{APP_PATH}index.php?m=member&c=index&a=register&siteid={$siteid}">现在注册</a><br />
+
+					  	<a href="{APP_PATH}index.php?m=member&c=index&a=public_get_password_type&siteid={$siteid}">忘记了密码?</a><br />
+
+
+					</ul>
+        		</div>
+
+      		</div>    
+
+  		</div>
+	</div> 
+    {template 'member', 'menu'}
+  </section>   
+<a class="go_top hidden hidden-phone" href="#top" style="display: inline; "><i class="icon icons_go_top"></i></a>
+
+
+</div>
+{template 'member', 'footer'}

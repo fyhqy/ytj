@@ -1,0 +1,28 @@
+<div id="footer" class="row-fluid hidden-phone" style="color: #cdcdcd; margin-top: 30px; padding-top:10px; border-top: 5px solid #286BA7">
+	<div class="span10 blogContent">
+		©2013-2014 {$SEO['site_title']} | 
+		{pc:content action="category" catid="1" num="15" siteid="$siteid" order="listorder ASC"}
+{loop $data $r}
+		<a href="{$r[url]}" target="_blank">{$r[catname]}</a> |  
+{/loop}
+{/pc} 
+<a href="{APP_PATH}index.php?m=link" target="_blank">友情链接</a>
+	</div>
+	<div class="span2 powered_by">
+		{tjcode()}{php echo runhook('glogal_footer')}
+	</div>
+	<br><br>
+</div>
+
+<script type="text/javascript">
+$(function(){
+	$(".picbig").each(function(i){
+		var cur = $(this).find('.img-wrap').eq(0);
+		var w = cur.width();
+		var h = cur.height();
+	   $(this).find('.img-wrap img').LoadImage(true, w, h,'{IMG_PATH}msg_img/loading.gif');
+	});
+})
+</script>
+</body>
+</html>
